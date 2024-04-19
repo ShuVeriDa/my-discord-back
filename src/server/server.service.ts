@@ -35,6 +35,7 @@ export class ServerService {
       },
       include: {
         members: true,
+        channels: true,
       },
     });
 
@@ -149,7 +150,7 @@ export class ServerService {
     return 'Successful removal';
   }
 
-  async validateServer(serverId: string, userId: string) {
+  async validateServer(serverId: string, userId?: string) {
     const user = await this.prisma.profile.findUnique({
       where: { id: userId },
     });
@@ -160,7 +161,7 @@ export class ServerService {
       (member) => member.profileId === user.id,
     );
 
-    if (!member) throw new NotFoundException('Member not found');
+    if (!member) throw new NotFoundException("You don't have rights");
 
     return { user, server, member };
   }
