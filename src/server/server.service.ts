@@ -8,22 +8,30 @@ import { MemberRole } from '@prisma/client';
 export class ServerService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createServer(dto: CreateServerDto, userId: string) {
-    const user = await this.prisma.profile.findUnique({
-      where: { id: userId },
+  async getAllServers(userId: string) {
+    return this.prisma.server.findMany({
+      where: {
+        members: {
+          some: {
+            profileId: userId,
+          },
+        },
+      },
     });
+  }
 
+  async createServer(dto: CreateServerDto, userId: string) {
     return this.prisma.server.create({
       data: {
-        profileId: user.id,
+        profileId: userId,
         name: dto.name,
         imageUrl: dto.imageUrl,
         inviteCode: uuidv4(),
         channels: {
-          create: [{ name: 'general', profileId: user.id }],
+          create: [{ name: 'general', profileId: userId }],
         },
         members: {
-          create: [{ profileId: user.id, role: MemberRole.ADMIN }],
+          create: [{ profileId: userId, role: MemberRole.ADMIN }],
         },
       },
     });
