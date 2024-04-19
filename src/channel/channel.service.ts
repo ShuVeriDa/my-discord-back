@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma.service';
 import { ServerService } from '../server/server.service';
 import { CreateChannelDto } from './dto/create.dto';
 import { MemberRole } from '@prisma/client';
+import { UpdateChannelDto } from './dto/update.dto';
 
 @Injectable()
 export class ChannelService {
@@ -85,6 +86,65 @@ export class ChannelService {
         name: channel.name,
         type: channel.type,
       };
+    });
+  }
+
+  async updateChannel(
+    dto: UpdateChannelDto,
+    channelId: string,
+    userId: string,
+  ) {
+    const { user, server, member } = await this.validateServer(
+      dto.serverId,
+      userId,
+    );
+
+    const isGuest = member.role === 'GUEST';
+
+    if (isGuest) throw new ForbiddenException('You have no rights!');
+
+    const channel = await this.getChannelById(channelId, server.id, user.id);
+
+    if (!channel) throw new NotFoundException('Channel not found');
+
+    await this.prisma.server.update({
+      where: {
+        id: server.id,
+        members: {
+          some: {
+            profileId: user.id,
+            role: {
+              in: [MemberRole.ADMIN, MemberRole.MODERATOR],
+            },
+          },
+        },
+      },
+      include: {
+        channels: true,
+      },
+      data: {
+        channels: {
+          update: {
+            where: {
+              id: channel.id,
+              NOT: {
+                name: 'general',
+              },
+            },
+            data: {
+              name: dto.name,
+              type: dto.type,
+            },
+          },
+        },
+      },
+    });
+
+    return this.prisma.channel.findUnique({
+      where: {
+        id: channel.id,
+        serverId: server.id,
+      },
     });
   }
 

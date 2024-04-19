@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   UsePipes,
   ValidationPipe,
@@ -12,6 +13,7 @@ import { ChannelService } from './channel.service';
 import { CreateChannelDto } from './dto/create.dto';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../user/decorators/user.decorator';
+import { UpdateChannelDto } from './dto/update.dto';
 
 @Controller('channel')
 export class ChannelController {
@@ -44,5 +46,17 @@ export class ChannelController {
   @Post()
   createChannel(@Body() dto: CreateChannelDto, @User('id') userId: string) {
     return this.channelService.createChannel(dto, userId);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @HttpCode(200)
+  @Auth()
+  @Patch(':id')
+  updateChannel(
+    @Body() dto: UpdateChannelDto,
+    @Param('id') channelId: string,
+    @User('id') userId: string,
+  ) {
+    return this.channelService.updateChannel(dto, channelId, userId);
   }
 }
