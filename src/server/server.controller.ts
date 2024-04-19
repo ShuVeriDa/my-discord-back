@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -52,5 +53,31 @@ export class ServerController {
     @User('id') userId: string,
   ) {
     return this.serverService.updateServer(dto, serverId, userId);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @HttpCode(200)
+  @Auth()
+  @Patch(':id/leave')
+  async leaveServer(@Param('id') serverId: string, @User('id') userId: string) {
+    return this.serverService.leaveServer(serverId, userId);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @HttpCode(200)
+  @Auth()
+  @Patch(':id/invite-code')
+  async inviteCode(@Param('id') serverId: string, @User('id') userId: string) {
+    return this.serverService.inviteCode(serverId, userId);
+  }
+
+  @HttpCode(200)
+  @Auth()
+  @Delete(':id')
+  async removeServer(
+    @Param('id') serverId: string,
+    @User('id') userId: string,
+  ) {
+    return this.serverService.removeServer(serverId, userId);
   }
 }

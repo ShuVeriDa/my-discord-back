@@ -87,4 +87,99 @@ export class ServerService {
       },
     });
   }
+
+  async leaveServer(serverId: string, userId: string) {
+    const user = await this.prisma.profile.findUnique({
+      where: { id: userId },
+    });
+
+    const server = await this.getServerById(serverId, user.id);
+
+    const member = server.members.find(
+      (member) => member.profileId === user.id,
+    );
+
+    if (!member) throw new NotFoundException('Member not found');
+
+    const isOwner = server.profileId === member.profileId;
+
+    if (isOwner)
+      throw new ForbiddenException('The owner сan only delete the server');
+
+    await this.prisma.server.update({
+      where: {
+        id: server.id,
+        profileId: {
+          not: user.id,
+        },
+        members: {
+          some: {
+            profileId: user.id,
+          },
+        },
+      },
+      data: {
+        members: {
+          deleteMany: {
+            profileId: user.id,
+          },
+        },
+      },
+    });
+
+    return 'You have successfully logged out of the server';
+  }
+
+  async inviteCode(serverId: string, userId: string) {
+    const user = await this.prisma.profile.findUnique({
+      where: { id: userId },
+    });
+
+    const server = await this.getServerById(serverId, user.id);
+
+    const member = server.members.find(
+      (member) => member.profileId === user.id,
+    );
+
+    if (!member) throw new NotFoundException('Member not found');
+
+    return this.prisma.server.update({
+      where: {
+        id: server.id,
+        profileId: user.id,
+      },
+      data: {
+        inviteCode: uuidv4(),
+      },
+    });
+  }
+
+  async removeServer(serverId: string, userId: string) {
+    const user = await this.prisma.profile.findUnique({
+      where: { id: userId },
+    });
+
+    const server = await this.getServerById(serverId, user.id);
+
+    const member = server.members.find(
+      (member) => member.profileId === user.id,
+    );
+
+    if (!member) throw new NotFoundException('Member not found');
+
+    const isOwner = server.profileId === member.profileId;
+    const isAdmin = member.role === 'ADMIN';
+
+    if (!isAdmin && !isOwner)
+      throw new ForbiddenException("You don't have rights");
+
+    await this.prisma.server.delete({
+      where: {
+        id: server.id,
+        profileId: user.id,
+      },
+    });
+
+    return 'Successful removal';
+  }
 }
