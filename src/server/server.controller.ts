@@ -46,17 +46,6 @@ export class ServerController {
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
-  @Patch('/subscribe')
-  async joinServer(
-    @Body('inviteCode') inviteCode: string,
-    @User('id') userId: string,
-  ) {
-    return this.serverService.joinServer(inviteCode, userId);
-  }
-
-  @UsePipes(new ValidationPipe())
-  @HttpCode(200)
-  @Auth()
   @Patch(':id')
   async updateServer(
     @Body() dto: UpdateServerDto,
@@ -72,14 +61,6 @@ export class ServerController {
   @Patch(':id/leave')
   async leaveServer(@Param('id') serverId: string, @User('id') userId: string) {
     return this.serverService.leaveServer(serverId, userId);
-  }
-
-  @UsePipes(new ValidationPipe())
-  @HttpCode(200)
-  @Auth()
-  @Patch(':id/invite-code')
-  async refreshCode(@Param('id') serverId: string, @User('id') userId: string) {
-    return this.serverService.refreshCode(serverId, userId);
   }
 
   @HttpCode(200)
