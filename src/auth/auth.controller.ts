@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   Post,
   Req,
@@ -13,7 +12,7 @@ import {
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/createUser.dto';
-import { Response, Request } from 'express';
+import { Request, Response } from 'express';
 import { LoginDto } from '../user/dto/login.dto';
 import * as process from 'process';
 

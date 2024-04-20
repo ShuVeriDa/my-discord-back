@@ -5,9 +5,10 @@ import { UserModule } from './user/user.module';
 import { ServerModule } from './server/server.module';
 import { ChannelModule } from './channel/channel.module';
 import { FileModule } from './file/file.module';
+import { MemberModule } from './member/member.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, UserModule, ServerModule, ChannelModule, FileModule],
+  imports: [ConfigModule.forRoot(), AuthModule, UserModule, ServerModule, ChannelModule, FileModule, MemberModule],
   controllers: [],
   providers: [],
 })

@@ -114,7 +114,7 @@ export class ServerService {
     return 'You have successfully logged out of the server';
   }
 
-  async inviteCode(serverId: string, userId: string) {
+  async refreshCode(serverId: string, userId: string) {
     const { server, user } = await this.validateServer(serverId, userId);
 
     return this.prisma.server.update({
@@ -124,6 +124,51 @@ export class ServerService {
       },
       data: {
         inviteCode: uuidv4(),
+      },
+    });
+  }
+
+  async joinServer(inviteCode: string, userId: string) {
+    const user = await this.prisma.profile.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    const server = await this.prisma.server.findFirst({
+      where: {
+        inviteCode: inviteCode,
+        members: {
+          some: {
+            NOT: { profileId: user.id },
+          },
+        },
+      },
+      include: {
+        members: true,
+      },
+    });
+
+    if (!server) throw new NotFoundException('Server not found');
+
+    const isMember = server.members.some(
+      (member) => member.profileId === user.id,
+    );
+
+    if (isMember) {
+      return 'You are already a member of the server';
+    }
+
+    return this.prisma.server.update({
+      where: {
+        inviteCode: inviteCode,
+      },
+      data: {
+        members: {
+          create: {
+            profileId: user.id,
+          },
+        },
       },
     });
   }

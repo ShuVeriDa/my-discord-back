@@ -16,7 +16,7 @@ import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../user/decorators/user.decorator';
 import { UpdateServerDto } from './dto/updateServer.dto';
 
-@Controller('server')
+@Controller('servers')
 export class ServerController {
   constructor(private readonly serverService: ServerService) {}
 
@@ -46,6 +46,17 @@ export class ServerController {
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
+  @Patch('/subscribe')
+  async joinServer(
+    @Body('inviteCode') inviteCode: string,
+    @User('id') userId: string,
+  ) {
+    return this.serverService.joinServer(inviteCode, userId);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @HttpCode(200)
+  @Auth()
   @Patch(':id')
   async updateServer(
     @Body() dto: UpdateServerDto,
@@ -67,8 +78,8 @@ export class ServerController {
   @HttpCode(200)
   @Auth()
   @Patch(':id/invite-code')
-  async inviteCode(@Param('id') serverId: string, @User('id') userId: string) {
-    return this.serverService.inviteCode(serverId, userId);
+  async refreshCode(@Param('id') serverId: string, @User('id') userId: string) {
+    return this.serverService.refreshCode(serverId, userId);
   }
 
   @HttpCode(200)

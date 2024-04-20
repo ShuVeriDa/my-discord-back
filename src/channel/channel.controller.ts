@@ -15,7 +15,7 @@ import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../user/decorators/user.decorator';
 import { UpdateChannelDto } from './dto/update.dto';
 
-@Controller('channel')
+@Controller('channels')
 export class ChannelController {
   constructor(private readonly channelService: ChannelService) {}
 

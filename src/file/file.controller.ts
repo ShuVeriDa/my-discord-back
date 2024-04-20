@@ -19,7 +19,7 @@ const VALID_UPLOADS_MIME_TYPES = [
   'application/pdf',
 ];
 
-@Controller('file')
+@Controller('files')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
