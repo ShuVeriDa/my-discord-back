@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
-import { CreateDto } from '../user/dto/create.dto';
+import { CreateUserDto } from '../user/dto/createUser.dto';
 import { Response, Request } from 'express';
 import { LoginDto } from '../user/dto/login.dto';
 import * as process from 'process';
@@ -42,7 +42,7 @@ export class AuthController {
   @HttpCode(200)
   @Post('register')
   async register(
-    @Body() dto: CreateDto,
+    @Body() dto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { refreshToken, ...response } = await this.authService.register(dto);

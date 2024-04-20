@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { CreateDto } from '../user/dto/create.dto';
+import { CreateUserDto } from '../user/dto/createUser.dto';
 import { Response } from 'express';
 import * as process from 'node:process';
 import { LoginDto } from '../user/dto/login.dto';
@@ -33,7 +33,7 @@ export class AuthService {
     };
   }
 
-  async register(dto: CreateDto) {
+  async register(dto: CreateUserDto) {
     const oldUser = await this.userService.getByEmail(dto.email);
 
     if (oldUser) throw new BadRequestException('User already exists');
