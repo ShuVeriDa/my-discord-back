@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
   Param,
   Patch,
@@ -26,5 +27,17 @@ export class MemberController {
     @User('id') userId: string,
   ) {
     return this.memberService.changeRole(dto, memberId, userId);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @HttpCode(200)
+  @Auth()
+  @Delete(':id')
+  removeMember(
+    @Body('serverId') serverId: string,
+    @Param('id') memberId: string,
+    @User('id') userId: string,
+  ) {
+    return this.memberService.removeMember(serverId, memberId, userId);
   }
 }
