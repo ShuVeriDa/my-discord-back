@@ -7,6 +7,7 @@ import { ChannelModule } from './channel/channel.module';
 import { FileModule } from './file/file.module';
 import { MemberModule } from './member/member.module';
 import { InviteModule } from './invite/invite.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { InviteModule } from './invite/invite.module';
     FileModule,
     MemberModule,
     InviteModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],
