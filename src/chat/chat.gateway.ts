@@ -13,6 +13,7 @@ import { Server } from 'socket.io';
 import { AuthWS } from '../auth/decorators/auth.decorator';
 import { UserWs } from '../user/decorators/user.decorator';
 import { DeleteChatDto } from './dto/delete-chat.dto';
+import { UpdateChatDto } from './dto/update-chat.dto';
 
 @WebSocketGateway()
 export class ChatGateway
@@ -48,6 +49,22 @@ export class ChatGateway
     this.emitMessageCreate(dto.channelId, createdMessage);
 
     return createdMessage;
+  }
+
+  @SubscribeMessage('editMessage')
+  @AuthWS()
+  async editMessageChannel(
+    @MessageBody() dto: UpdateChatDto,
+    @UserWs('id') userId: string,
+  ) {
+    const editedMessage = await this.chatService.editMessageChannel(
+      dto,
+      userId,
+    );
+
+    this.emitMessageCreate(dto.channelId, editedMessage);
+
+    return editedMessage;
   }
 
   @SubscribeMessage('deleteMessage')

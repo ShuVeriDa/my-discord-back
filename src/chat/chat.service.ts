@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { DeleteChatDto } from './dto/delete-chat.dto';
 import { MemberRole } from '@prisma/client';
+import { UpdateChatDto } from './dto/update-chat.dto';
 
 @Injectable()
 export class ChatService {
@@ -36,6 +37,33 @@ export class ChatService {
     });
   }
 
+  async editMessageChannel(dto: UpdateChatDto, userId: string) {
+    const { channel, member } = await this.validation(
+      dto.serverId,
+      dto.channelId,
+      userId,
+    );
+
+    const { message } = await this.validateMessage(
+      dto.messageId,
+      channel.id,
+      member.id,
+      member.role,
+    );
+
+    return this.prisma.message.update({
+      where: {
+        id: message.id,
+      },
+      data: {
+        content: dto.content,
+      },
+      include: {
+        member: true,
+      },
+    });
+  }
+
   async removeMessageChannel(dto: DeleteChatDto, userId: string) {
     const { channel, member } = await this.validation(
       dto.serverId,
@@ -43,22 +71,12 @@ export class ChatService {
       userId,
     );
 
-    const message = await this.prisma.message.findFirst({
-      where: {
-        id: dto.messageId,
-        channelId: channel.id,
-      },
-    });
-
-    if (!message) throw new NotFoundException('The message not found');
-
-    const isMessageOwner = message.memberId === member.id;
-    const isAdmin = member.role === MemberRole.ADMIN;
-    const isModerator = member.role === MemberRole.MODERATOR;
-
-    const canModify = isMessageOwner || isAdmin || isModerator;
-
-    if (!canModify) throw new ForbiddenException("You don't have rights");
+    const { message } = await this.validateMessage(
+      dto.messageId,
+      channel.id,
+      member.id,
+      member.role,
+    );
 
     return this.prisma.message.update({
       where: {
@@ -74,6 +92,8 @@ export class ChatService {
       },
     });
   }
+
+  // Validate //
 
   async validation(serverId: string, channelId: string, userId: string) {
     const user = await this.prisma.profile.findUnique({
@@ -119,5 +139,31 @@ export class ChatService {
       member,
       user,
     };
+  }
+
+  async validateMessage(
+    messageId: string,
+    channelId: string,
+    memberId: string,
+    memberRole: MemberRole,
+  ) {
+    const message = await this.prisma.message.findFirst({
+      where: {
+        id: messageId,
+        channelId: channelId,
+      },
+    });
+
+    if (!message) throw new NotFoundException('The message not found');
+
+    const isMessageOwner = message.memberId === memberId;
+    const isAdmin = memberRole === MemberRole.ADMIN;
+    const isModerator = memberRole === MemberRole.MODERATOR;
+
+    const canModify = isMessageOwner || isAdmin || isModerator;
+
+    if (!canModify) throw new ForbiddenException("You don't have rights");
+
+    return { message };
   }
 }
