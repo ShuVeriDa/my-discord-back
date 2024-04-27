@@ -17,22 +17,35 @@ model Profile {
   servers  Server[]
   members  Member[]
   channels Channel[]
-  friends  Friend[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  friendSender   Friend[] @relation("senderId")
+  friendReceived Friend[] @relation("recipientId")
 }
 
 model Friend {
-  id String @id @default(uuid())
+  id     String       @id @default(uuid())
+  status FriendStatus @default(PENDING)
 
-  profileId String
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   Profile @relation("senderId", fields: [senderId], references: [id], onDelete: Cascade)
+
+  recipientId String
+  recipient   Profile @relation("recipientId", fields: [recipientId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([profileId])
+  @@unique([senderId, recipientId])
+  @@index([senderId])
+  @@index([recipientId])
+}
+
+enum FriendStatus {
+  PENDING
+  ACCEPTED
 }
 
 model Server {

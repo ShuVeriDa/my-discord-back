@@ -33,7 +33,7 @@ export class ChatGateway
   }
 
   afterInit(server: Server) {
-    console.log('WebSocket gateway initialized');
+    console.log('WebSocket chat gateway initialized');
   }
 
   @SubscribeMessage('fetchMessagesChannel')
@@ -79,7 +79,7 @@ export class ChatGateway
       userId,
     );
 
-    this.emitMessageCreate(dto.channelId, editedMessage);
+    this.emitMessageUpdate(dto.channelId, editedMessage);
 
     return editedMessage;
   }
@@ -95,17 +95,24 @@ export class ChatGateway
       userId,
     );
 
-    this.emitMessageCreate(dto.channelId, deletedMessage);
+    this.emitMessageUpdate(dto.channelId, deletedMessage);
 
     return deletedMessage;
+  }
+
+  //emit
+
+  private emitFetchMessages(channelId: string, message: any) {
+    const fetchKey = `chat:${channelId}:messages`;
+    this.server.emit(fetchKey, message);
   }
 
   private emitMessageCreate(channelId: string, message: any) {
     const createKey = `chat:${channelId}:messages:create`;
     this.server.emit(createKey, message);
   }
-  private emitFetchMessages(channelId: string, message: any) {
-    const fetchKey = `chat:${channelId}:messages`;
-    this.server.emit(fetchKey, message);
+  private emitMessageUpdate(channelId: string, message: any) {
+    const updateKey = `chat:${channelId}:messages:update`;
+    this.server.emit(updateKey, message);
   }
 }

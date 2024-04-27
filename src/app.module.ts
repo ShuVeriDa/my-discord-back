@@ -8,6 +8,7 @@ import { FileModule } from './file/file.module';
 import { MemberModule } from './member/member.module';
 import { InviteModule } from './invite/invite.module';
 import { ChatModule } from './chat/chat.module';
+import { FriendModule } from './friend/friend.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ChatModule } from './chat/chat.module';
     MemberModule,
     InviteModule,
     ChatModule,
+    FriendModule,
   ],
   controllers: [],
   providers: [],
