@@ -23,7 +23,6 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('login')
   async login(
@@ -37,7 +36,6 @@ export class AuthController {
     return response;
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('register')
   async register(

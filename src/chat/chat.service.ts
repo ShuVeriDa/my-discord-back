@@ -8,10 +8,59 @@ import { CreateChatDto } from './dto/create-chat.dto';
 import { DeleteChatDto } from './dto/delete-chat.dto';
 import { MemberRole } from '@prisma/client';
 import { UpdateChatDto } from './dto/update-chat.dto';
+import { FetchChatDto } from './dto/fetch-chat.dto';
 
 @Injectable()
 export class ChatService {
+  MESSAGES_BATCH = 10;
+
   constructor(private readonly prisma: PrismaService) {}
+
+  async fetchMessagesChannel(dto: FetchChatDto, userId: string) {
+    const { channelId, serverId, cursor } = dto;
+
+    const { channel } = await this.validation(serverId, channelId, userId);
+    let messages = [];
+    if (cursor) {
+      messages = await this.prisma.message.findMany({
+        take: this.MESSAGES_BATCH,
+        skip: 1,
+        cursor: {
+          id: cursor,
+        },
+        where: {
+          channelId: channel.id,
+        },
+        include: {
+          member: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } else {
+      messages = await this.prisma.message.findMany({
+        take: this.MESSAGES_BATCH,
+        where: {
+          channelId: channel.id,
+        },
+        include: {
+          member: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    }
+
+    let nextCursor = null;
+
+    if (messages.length === this.MESSAGES_BATCH) {
+      nextCursor = messages[this.MESSAGES_BATCH - 1].id;
+    }
+
+    return { messages, nextCursor };
+  }
 
   async newMessageChannel(dto: CreateChatDto, userId: string) {
     const { content, channelId, serverId, fileUrl } = dto;

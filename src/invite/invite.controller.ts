@@ -15,7 +15,6 @@ import { User } from '../user/decorators/user.decorator';
 export class InviteController {
   constructor(private readonly inviteService: InviteService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Patch()
@@ -26,7 +25,6 @@ export class InviteController {
     return this.inviteService.joinServer(inviteCode, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Patch(':id')

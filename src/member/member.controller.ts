@@ -17,7 +17,6 @@ import { User } from '../user/decorators/user.decorator';
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Patch(':id')
@@ -29,7 +28,6 @@ export class MemberController {
     return this.memberService.changeRole(dto, memberId, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Delete(':id')

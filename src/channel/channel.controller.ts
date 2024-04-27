@@ -28,7 +28,6 @@ export class ChannelController {
     return this.channelService.getAllChannels(serverId, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Post(':id')
@@ -40,7 +39,6 @@ export class ChannelController {
     return this.channelService.getChannelById(channelId, serverId, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Post()
@@ -48,7 +46,6 @@ export class ChannelController {
     return this.channelService.createChannel(dto, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Patch(':id')

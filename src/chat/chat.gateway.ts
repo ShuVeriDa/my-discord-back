@@ -14,6 +14,7 @@ import { AuthWS } from '../auth/decorators/auth.decorator';
 import { UserWs } from '../user/decorators/user.decorator';
 import { DeleteChatDto } from './dto/delete-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
+import { FetchChatDto } from './dto/fetch-chat.dto';
 
 @WebSocketGateway()
 export class ChatGateway
@@ -33,6 +34,22 @@ export class ChatGateway
 
   afterInit(server: Server) {
     console.log('WebSocket gateway initialized');
+  }
+
+  @SubscribeMessage('fetchMessagesChannel')
+  @AuthWS()
+  async fetchMessagesChannel(
+    @MessageBody() dto: FetchChatDto,
+    @UserWs('id') userId: string,
+  ) {
+    const fetchMessages = await this.chatService.fetchMessagesChannel(
+      dto,
+      userId,
+    );
+
+    this.emitFetchMessages(dto.channelId, fetchMessages);
+
+    return fetchMessages;
   }
 
   @SubscribeMessage('createMessage')
@@ -86,5 +103,9 @@ export class ChatGateway
   private emitMessageCreate(channelId: string, message: any) {
     const createKey = `chat:${channelId}:messages:create`;
     this.server.emit(createKey, message);
+  }
+  private emitFetchMessages(channelId: string, message: any) {
+    const fetchKey = `chat:${channelId}:messages`;
+    this.server.emit(fetchKey, message);
   }
 }

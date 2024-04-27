@@ -7,8 +7,6 @@ import {
   Param,
   Patch,
   Post,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ServerService } from './server.service';
 import { CreateServerDto } from './dto/createServer.dto';
@@ -35,7 +33,6 @@ export class ServerController {
     return this.serverService.getServerById(serverId, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Post()
@@ -43,7 +40,6 @@ export class ServerController {
     return this.serverService.createServer(dto, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Patch(':id')
@@ -55,7 +51,6 @@ export class ServerController {
     return this.serverService.updateServer(dto, serverId, userId);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Patch(':id/leave')
