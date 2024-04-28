@@ -1,14 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AddFriendDto } from './dto/addFriend.dto';
+import { RespondToFriendDto } from './dto/respondToFriend.dto';
 
 @Injectable()
 export class FriendService {
   constructor(private readonly prisma: PrismaService) {}
 
   async friendRequest(dto: AddFriendDto, userId: string) {
-    console.log(dto);
-
     const friend = await this.prisma.friend.findFirst({
       where: {
         recipientId: dto.recipientId,
@@ -28,5 +31,39 @@ export class FriendService {
         status: 'PENDING',
       },
     });
+  }
+
+  async respondToFriendRequest(dto: RespondToFriendDto, userId: string) {
+    const friend = await this.prisma.friend.findFirst({
+      where: {
+        id: dto.friendIdEntity,
+        senderId: userId,
+        recipientId: dto.recipientId,
+      },
+    });
+
+    if (!friend)
+      throw new ForbiddenException('The request to add a friend not found');
+
+    if (dto.accept) {
+      return this.prisma.friend.update({
+        where: {
+          id: friend.id,
+          recipientId: friend.recipientId,
+          senderId: friend.senderId,
+        },
+        data: {
+          status: 'ACCEPTED',
+        },
+      });
+    } else {
+      return this.prisma.friend.delete({
+        where: {
+          id: friend.id,
+          recipientId: friend.recipientId,
+          senderId: friend.senderId,
+        },
+      });
+    }
   }
 }

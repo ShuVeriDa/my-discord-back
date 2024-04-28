@@ -13,6 +13,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthWS } from '../auth/decorators/auth.decorator';
 import { AddFriendDto } from './dto/addFriend.dto';
 import { UserWs } from '../user/decorators/user.decorator';
+import { RespondToFriendDto } from './dto/respondToFriend.dto';
 
 @WebSocketGateway()
 export class FriendGateway
@@ -47,8 +48,26 @@ export class FriendGateway
     return friendRequest;
   }
 
+  @SubscribeMessage('respondToFriendRequest')
+  @AuthWS()
+  async handleRespondToFriendRequest(
+    @MessageBody() dto: RespondToFriendDto,
+    @UserWs('id') userId: string,
+  ) {
+    const friend = await this.friendService.respondToFriendRequest(dto, userId);
+
+    this.emitRespondFriend(dto.recipientId, friend);
+
+    return friend;
+  }
+
   private emitRequestFriend(recipientId: string, message: any) {
-    const createKey = `friend:${recipientId}:request`;
-    this.server.emit(createKey, message);
+    const addKey = `friend:${recipientId}:request`;
+    this.server.emit(addKey, message);
+  }
+
+  private emitRespondFriend(recipientId: string, message: any) {
+    const respondFriendKey = `friend:${recipientId}:respond`;
+    this.server.emit(respondFriendKey, message);
   }
 }
