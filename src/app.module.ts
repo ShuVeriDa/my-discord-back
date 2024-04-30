@@ -9,6 +9,7 @@ import { MemberModule } from './member/member.module';
 import { InviteModule } from './invite/invite.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendModule } from './friend/friend.module';
+import { ConversationModule } from './conversation/conversation.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { FriendModule } from './friend/friend.module';
     InviteModule,
     ChatModule,
     FriendModule,
+    ConversationModule,
   ],
   controllers: [],
   providers: [],

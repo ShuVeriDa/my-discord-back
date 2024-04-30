@@ -1,5 +1,4 @@
 import {
-  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -9,7 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { FriendService } from './friend.service';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { AuthWS } from '../auth/decorators/auth.decorator';
 import { AddFriendDto } from './dto/addFriend.dto';
 import { UserWs } from '../user/decorators/user.decorator';
