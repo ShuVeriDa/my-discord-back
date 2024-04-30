@@ -4,25 +4,30 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { ConversationDto } from './dto/conversation.dto';
 import { CreateConversationDto } from './dto/createConversation.dto';
 
 @Injectable()
 export class ConversationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async fetchConversation(dto: ConversationDto, userId: string) {
-    const conversation =
-      (await this.getTheConversation(dto.userOneId, dto.userTwoId)) ||
-      (await this.getTheConversation(dto.userTwoId, dto.userOneId));
+  async fetchConversation(conversationId: string, userId: string) {
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+      },
+      include: {
+        userOne: true,
+        userTwo: true,
+      },
+    });
 
     if (!conversation)
       throw new NotFoundException('The conversation was not found');
 
-    const isOneOfConversation =
+    const isConversationParticipant =
       conversation.userOneId === userId || conversation.userTwoId === userId;
 
-    if (!isOneOfConversation)
+    if (!isConversationParticipant)
       throw new ForbiddenException("You don't have rights");
 
     delete conversation.userOne.password;
@@ -63,17 +68,5 @@ export class ConversationService {
     delete createdConversation.userTwo.password;
 
     return createdConversation;
-  }
-
-  private async getTheConversation(userOneId: string, userTwoId: string) {
-    return this.prisma.conversation.findFirst({
-      where: {
-        AND: [{ userOneId: userOneId }, { userTwoId: userTwoId }],
-      },
-      include: {
-        userOne: true,
-        userTwo: true,
-      },
-    });
   }
 }

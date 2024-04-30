@@ -1,7 +1,6 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { Auth } from '../auth/decorators/auth.decorator';
-import { ConversationDto } from './dto/conversation.dto';
 import { User } from '../user/decorators/user.decorator';
 import { CreateConversationDto } from './dto/createConversation.dto';
 
@@ -10,10 +9,13 @@ export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
 
   @HttpCode(200)
-  @Post('/fetch')
+  @Get(':id')
   @Auth()
-  fetchConversation(@Body() dto: ConversationDto, @User('id') userId: string) {
-    return this.conversationService.fetchConversation(dto, userId);
+  fetchConversation(
+    @Param('id') conversationId: string,
+    @User('id') userId: string,
+  ) {
+    return this.conversationService.fetchConversation(conversationId, userId);
   }
 
   @HttpCode(200)
