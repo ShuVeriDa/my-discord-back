@@ -13,6 +13,7 @@ import { Body } from '@nestjs/common';
 import { CreateDirectMessageDto } from './dto/create.dto';
 import { UserWs } from '../user/decorators/user.decorator';
 import { FetchDirectMessageDto } from './dto/fetch.dto';
+import { UpdateDirectMessageDto } from './dto/update.dto';
 
 @WebSocketGateway()
 export class DirectMessageGateway
@@ -66,8 +67,29 @@ export class DirectMessageGateway
     return message;
   }
 
+  @SubscribeMessage('updateDirectMessage')
+  @AuthWS()
+  async updateDirectMessage(
+    @Body() dto: UpdateDirectMessageDto,
+    @UserWs('id') userId: string,
+  ) {
+    const message = await this.directMessageService.updateDirectMessage(
+      dto,
+      userId,
+    );
+
+    this.emitUpdateDirectMessages(dto.conversationId, message);
+
+    return message;
+  }
+
   private emitCreateDirectMessages(conversationId: string, message: any) {
     const createKey = `conversation:${conversationId}:messages`;
     this.server.emit(createKey, message);
+  }
+
+  private emitUpdateDirectMessages(conversationId: string, message: any) {
+    const updateKey = `conversation:${conversationId}:messages:update`;
+    this.server.emit(updateKey, message);
   }
 }

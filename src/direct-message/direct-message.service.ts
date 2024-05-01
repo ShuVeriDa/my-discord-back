@@ -1,8 +1,13 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateDirectMessageDto } from './dto/create.dto';
 import { ConversationService } from '../conversation/conversation.service';
 import { FetchDirectMessageDto } from './dto/fetch.dto';
+import { UpdateDirectMessageDto } from './dto/update.dto';
 
 @Injectable()
 export class DirectMessageService {
@@ -85,11 +90,12 @@ export class DirectMessageService {
       userId,
     );
 
-    const IsUserTwo =
+    const isConversationParticipant =
       conversation.userTwoId === dto.userTwoId ||
       conversation.userOneId === dto.userTwoId;
 
-    if (!IsUserTwo) throw new ForbiddenException("You don't have rights");
+    if (!isConversationParticipant)
+      throw new ForbiddenException("You don't have rights");
 
     const message = await this.prisma.directMessage.create({
       data: {
@@ -110,5 +116,80 @@ export class DirectMessageService {
     delete message.profile.updatedAt;
 
     return message;
+  }
+
+  async updateDirectMessage(dto: UpdateDirectMessageDto, userId: string) {
+    const directMessage = await this.validateDirectMessage(
+      dto.conversationId,
+      dto.messageId,
+      userId,
+    );
+
+    return this.prisma.directMessage.update({
+      where: {
+        id: directMessage.id,
+      },
+      data: {
+        content: dto.content,
+        fileUrl: dto.fileUrl,
+      },
+      include: {
+        profile: true,
+        conversation: true,
+      },
+    });
+  }
+
+  async validateDirectMessage(
+    conversationId: string,
+    messageId: string,
+    userId: string,
+  ) {
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+        OR: [
+          {
+            userOneId: userId,
+          },
+          {
+            userTwoId: userId,
+          },
+        ],
+      },
+      include: {
+        userOne: true,
+        userTwo: true,
+      },
+    });
+
+    if (!conversation)
+      throw new NotFoundException('The conversation not found');
+
+    const profile =
+      conversation.userOneId === userId
+        ? conversation.userOne
+        : conversation.userTwo;
+
+    if (!profile) throw new NotFoundException('The participant was not found');
+
+    const directMessage = await this.prisma.directMessage.findFirst({
+      where: {
+        id: messageId,
+        conversationId: conversation.id,
+      },
+      include: {
+        profile: true,
+      },
+    });
+
+    if (!directMessage || directMessage.deleted)
+      throw new NotFoundException('Message not found');
+
+    const isUserOwner = directMessage.profileId === profile.id;
+
+    if (!isUserOwner) throw new ForbiddenException("You don't have rights");
+
+    return directMessage;
   }
 }
