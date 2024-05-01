@@ -14,6 +14,7 @@ import { CreateDirectMessageDto } from './dto/create.dto';
 import { UserWs } from '../user/decorators/user.decorator';
 import { FetchDirectMessageDto } from './dto/fetch.dto';
 import { UpdateDirectMessageDto } from './dto/update.dto';
+import { DeleteDirectMessageDto } from './dto/delete.dto';
 
 @WebSocketGateway()
 export class DirectMessageGateway
@@ -74,6 +75,22 @@ export class DirectMessageGateway
     @UserWs('id') userId: string,
   ) {
     const message = await this.directMessageService.updateDirectMessage(
+      dto,
+      userId,
+    );
+
+    this.emitUpdateDirectMessages(dto.conversationId, message);
+
+    return message;
+  }
+
+  @SubscribeMessage('deleteDirectMessage')
+  @AuthWS()
+  async deleteDirectMessage(
+    @Body() dto: DeleteDirectMessageDto,
+    @UserWs('id') userId: string,
+  ) {
+    const message = await this.directMessageService.deleteDirectMessage(
       dto,
       userId,
     );

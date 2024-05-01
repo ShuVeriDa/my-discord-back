@@ -8,6 +8,7 @@ import { CreateDirectMessageDto } from './dto/create.dto';
 import { ConversationService } from '../conversation/conversation.service';
 import { FetchDirectMessageDto } from './dto/fetch.dto';
 import { UpdateDirectMessageDto } from './dto/update.dto';
+import { DeleteDirectMessageDto } from './dto/delete.dto';
 
 @Injectable()
 export class DirectMessageService {
@@ -136,6 +137,29 @@ export class DirectMessageService {
       include: {
         profile: true,
         conversation: true,
+      },
+    });
+  }
+
+  async deleteDirectMessage(dto: DeleteDirectMessageDto, userId: string) {
+    const directMessage = await this.validateDirectMessage(
+      dto.conversationId,
+      dto.messageId,
+      userId,
+    );
+
+    return this.prisma.directMessage.update({
+      where: {
+        id: directMessage.id,
+      },
+      data: {
+        fileUrl: null,
+        content: 'This message has been deleted.',
+        deleted: true,
+      },
+      include: {
+        conversation: true,
+        profile: true,
       },
     });
   }
