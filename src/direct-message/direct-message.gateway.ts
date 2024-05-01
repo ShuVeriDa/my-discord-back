@@ -12,6 +12,7 @@ import { AuthWS } from '../auth/decorators/auth.decorator';
 import { Body } from '@nestjs/common';
 import { CreateDirectMessageDto } from './dto/create.dto';
 import { UserWs } from '../user/decorators/user.decorator';
+import { FetchDirectMessageDto } from './dto/fetch.dto';
 
 @WebSocketGateway()
 export class DirectMessageGateway
@@ -33,6 +34,22 @@ export class DirectMessageGateway
     console.log('WebSocket directMessage gateway initialized');
   }
 
+  @SubscribeMessage('fetchDirectMessages')
+  @AuthWS()
+  async fetchDirectMessages(
+    @Body() dto: FetchDirectMessageDto,
+    @UserWs('id') userId: string,
+  ) {
+    const message = await this.directMessageService.fetchDirectMessages(
+      dto,
+      userId,
+    );
+
+    this.emitCreateDirectMessages(dto.conversationId, message);
+
+    return message;
+  }
+
   @SubscribeMessage('sendDirectMessage')
   @AuthWS()
   async sendDirectMessage(
@@ -50,7 +67,7 @@ export class DirectMessageGateway
   }
 
   private emitCreateDirectMessages(conversationId: string, message: any) {
-    const createKey = `conversation:${conversationId}:messages:create`;
+    const createKey = `conversation:${conversationId}:messages`;
     this.server.emit(createKey, message);
   }
 }

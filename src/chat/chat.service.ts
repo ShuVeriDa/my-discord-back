@@ -20,7 +20,9 @@ export class ChatService {
     const { channelId, serverId, cursor } = dto;
 
     const { channel } = await this.validation(serverId, channelId, userId);
+
     let messages = [];
+
     if (cursor) {
       messages = await this.prisma.message.findMany({
         take: this.MESSAGES_BATCH,
