@@ -10,6 +10,7 @@ import { InviteModule } from './invite/invite.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendModule } from './friend/friend.module';
 import { ConversationModule } from './conversation/conversation.module';
+import { DirectMessageModule } from './direct-message/direct-message.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ConversationModule } from './conversation/conversation.module';
     ChatModule,
     FriendModule,
     ConversationModule,
+    DirectMessageModule,
   ],
   controllers: [],
   providers: [],
