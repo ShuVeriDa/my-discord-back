@@ -9,6 +9,7 @@ import { ConversationService } from '../conversation/conversation.service';
 import { FetchDirectMessageDto } from './dto/fetch.dto';
 import { UpdateDirectMessageDto } from './dto/update.dto';
 import { DeleteDirectMessageDto } from './dto/delete.dto';
+import { DeleteAllDirectMessagesDto } from './dto/deleteAll.dto';
 
 @Injectable()
 export class DirectMessageService {
@@ -160,6 +161,34 @@ export class DirectMessageService {
       include: {
         conversation: true,
         profile: true,
+      },
+    });
+  }
+
+  async deleteAllDirectMessages(
+    dto: DeleteAllDirectMessagesDto,
+    userId: string,
+  ) {
+    const conversation = await this.conversationService.fetchConversation(
+      dto.conversationId,
+      userId,
+    );
+
+    const IsUserTwo =
+      conversation.userTwoId === dto.userTwoId ||
+      conversation.userOneId === dto.userTwoId;
+
+    if (!IsUserTwo) throw new ForbiddenException("You don't have rights");
+
+    await this.prisma.directMessage.deleteMany({
+      where: {
+        conversationId: conversation.id,
+      },
+    });
+
+    return this.prisma.directMessage.findMany({
+      where: {
+        conversationId: conversation.id,
       },
     });
   }
