@@ -69,4 +69,16 @@ export class ConversationService {
 
     return createdConversation;
   }
+
+  async deleteConversation(conversationId: string, userId: string) {
+    const conversation = await this.fetchConversation(conversationId, userId);
+
+    await this.prisma.conversation.delete({
+      where: {
+        id: conversation.id,
+      },
+    });
+
+    return 'The conversation has been deleted';
+  }
 }

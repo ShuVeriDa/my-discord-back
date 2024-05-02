@@ -9,9 +9,9 @@ import { ConversationService } from '../conversation/conversation.service';
   providers: [
     DirectMessageGateway,
     DirectMessageService,
+    ConversationService,
     PrismaService,
     JwtService,
-    ConversationService,
   ],
 })
 export class DirectMessageModule {}

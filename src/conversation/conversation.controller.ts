@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../user/decorators/user.decorator';
@@ -19,12 +27,22 @@ export class ConversationController {
   }
 
   @HttpCode(200)
-  @Auth()
   @Post('/create')
+  @Auth()
   createNewConversation(
     @Body() dto: CreateConversationDto,
     @User('id') userId: string,
   ) {
     return this.conversationService.createNewConversation(dto, userId);
+  }
+
+  @HttpCode(200)
+  @Delete(':id')
+  @Auth()
+  deleteConversation(
+    @Param('id') conversationId: string,
+    @User('id') userId: string,
+  ) {
+    return this.conversationService.deleteConversation(conversationId, userId);
   }
 }
