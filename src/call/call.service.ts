@@ -28,8 +28,8 @@ export class CallService {
       throw new ForbiddenException('Server misconfigured');
 
     const at = new AccessToken(apiKey, apiSecret, {
-      identity: user.name,
-      // name: user.name,
+      identity: user.id,
+      name: user.name,
     });
     at.addGrant({
       room: roomId,
