@@ -51,7 +51,7 @@ export class ChannelService {
     if (dto.name === 'general')
       throw new ForbiddenException("Name cannot be 'general'");
 
-    const isGuest = member.role === 'GUEST';
+    const isGuest = member.role === MemberRole.GUEST;
 
     if (isGuest) throw new ForbiddenException("You don't have rights");
 
@@ -99,7 +99,7 @@ export class ChannelService {
       userId,
     );
 
-    const isGuest = member.role === 'GUEST';
+    const isGuest = member.role === MemberRole.GUEST;
 
     if (isGuest) throw new ForbiddenException('You have no rights!');
 

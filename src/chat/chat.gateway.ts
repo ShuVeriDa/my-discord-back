@@ -15,6 +15,7 @@ import { UserWs } from '../user/decorators/user.decorator';
 import { DeleteChatDto } from './dto/delete-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { FetchChatDto } from './dto/fetch-chat.dto';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway()
 export class ChatGateway
@@ -22,18 +23,20 @@ export class ChatGateway
 {
   @WebSocketServer() server: Server;
 
+  private readonly logger: Logger = new Logger(ChatGateway.name);
+
   constructor(private readonly chatService: ChatService) {}
 
   handleDisconnect(client: any) {
-    console.log(`Client disconnected: ${client.id}`);
+    this.logger.log(`Client disconnected: ${client.id}`);
   }
 
   handleConnection(client: any, ...args: any[]) {
-    console.log(`Client connected: ${client.id} ${args}`);
+    this.logger.log(`Client connected: ${client.id} ${args}`);
   }
 
   afterInit(server: Server) {
-    console.log('WebSocket chat gateway initialized');
+    this.logger.log('WebSocket chat gateway initialized');
   }
 
   @SubscribeMessage('fetchMessagesChannel')
@@ -111,6 +114,7 @@ export class ChatGateway
     const createKey = `chat:${channelId}:messages:create`;
     this.server.emit(createKey, message);
   }
+
   private emitMessageUpdate(channelId: string, message: any) {
     const updateKey = `chat:${channelId}:messages:update`;
     this.server.emit(updateKey, message);

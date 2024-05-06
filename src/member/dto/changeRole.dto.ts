@@ -4,7 +4,7 @@ import { MemberRole } from '@prisma/client';
 export class ChangeRoleDto {
   @IsOptional()
   @IsString()
-  serverId: string;
+  serverId?: string;
 
   @IsString()
   role: MemberRole;

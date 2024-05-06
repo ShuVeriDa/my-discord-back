@@ -23,7 +23,7 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const { password, ...user } = await this.validateUser(dto);
+    const { password: _, ...user } = await this.validateUser(dto);
 
     const tokens = await this.issueTokens(user.id);
 
@@ -38,7 +38,7 @@ export class AuthService {
 
     if (oldUser) throw new BadRequestException('User already exists');
 
-    const { password, ...user } = await this.userService.create(dto);
+    const { password: _, ...user } = await this.userService.create(dto);
 
     const tokens = await this.issueTokens(user.id);
 
@@ -69,6 +69,7 @@ export class AuthService {
     res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
       //серверные куки, не будет показывать в браузере, должны быть в безопасности
       httpOnly: true,
+      //TODO: в .env
       domain: 'localhost',
       // время окончания куки
       expires: expiresIn,

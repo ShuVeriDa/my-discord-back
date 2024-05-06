@@ -28,13 +28,14 @@ export class FriendService {
       data: {
         recipientId: dto.recipientId,
         senderId: userId,
+        //TODO:Add into enum
         status: 'PENDING',
       },
     });
   }
 
   async respondToFriendRequest(dto: RespondToFriendDto, userId: string) {
-    const friend = await this.prisma.friend.findFirst({
+    const friend = await this.prisma.friend.findUnique({
       where: {
         id: dto.friendIdEntity,
         senderId: userId,

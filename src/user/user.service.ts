@@ -24,7 +24,9 @@ export class UserService {
       email: dto.email,
       password: await hash(dto.password),
       name: dto.name,
-      imageUrl: dto.imageUrl,
+      imageUrl: dto.imageUrl
+        ? dto.imageUrl
+        : '/uploads/avatar/avatar-default.png',
     };
 
     return this.prisma.profile.create({

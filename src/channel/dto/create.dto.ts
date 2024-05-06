@@ -6,6 +6,7 @@ export class CreateChannelDto {
   name: string;
 
   @IsString()
+  // @Matches(`^${Object.values(UserRole).filter(v => typeof v !== "number").join('|')}$`, 'i')
   type: ChannelType;
 
   @IsString()

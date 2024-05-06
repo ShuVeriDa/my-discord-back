@@ -64,7 +64,7 @@ export class ServerService {
   async updateServer(dto: UpdateServerDto, serverId: string, userId: string) {
     const { member } = await this.validateServer(serverId, userId);
 
-    const isGuest = member.role === 'GUEST';
+    const isGuest = member.role === MemberRole.GUEST;
 
     if (isGuest) throw new ForbiddenException('You have no rights!');
 
@@ -121,7 +121,7 @@ export class ServerService {
     );
 
     const isOwner = server.profileId === member.profileId;
-    const isAdmin = member.role === 'ADMIN';
+    const isAdmin = member.role === MemberRole.ADMIN;
 
     if (!isAdmin && !isOwner)
       throw new ForbiddenException("You don't have rights");

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { ChangeRoleDto } from './dto/changeRole.dto';
+import { MemberRole } from '@prisma/client';
 
 @Injectable()
 export class MemberService {
@@ -82,7 +83,7 @@ export class MemberService {
       where: { id: userId },
     });
 
-    const server = await this.prisma.server.findFirst({
+    const server = await this.prisma.server.findUnique({
       where: {
         id: serverId,
       },
@@ -94,7 +95,8 @@ export class MemberService {
     if (!server) throw new NotFoundException('Server not found');
 
     const isGuest =
-      server.members.find((m) => m.profileId === user.id).role === 'GUEST';
+      server.members.find((m) => m.profileId === user.id).role ===
+      MemberRole.GUEST;
 
     if (isGuest) throw new ForbiddenException("You don't have rights");
 
