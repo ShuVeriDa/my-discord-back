@@ -11,6 +11,21 @@ import { MemberRole } from '@prisma/client';
 export class MemberService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async fetchOneMember(serverId: string, userId: string) {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        profileId: userId,
+        server: {
+          id: serverId,
+        },
+      },
+    });
+
+    if (!member) throw new NotFoundException('Member not found');
+
+    return member;
+  }
+
   async changeRole(dto: ChangeRoleDto, memberId: string, userId: string) {
     const { server, member, user } = await this.validateMember(
       dto.serverId,
@@ -78,6 +93,7 @@ export class MemberService {
     });
   }
 
+  // TODO: Исправить, так как не используется memberId
   async validateMember(serverId: string, memberId: string, userId: string) {
     const user = await this.prisma.profile.findUnique({
       where: { id: userId },
@@ -100,7 +116,16 @@ export class MemberService {
 
     if (isGuest) throw new ForbiddenException("You don't have rights");
 
-    const member = server.members.find((m) => m.id === memberId);
+    const member = await this.prisma.member.findFirst({
+      where: {
+        profileId: user.id,
+        server: {
+          id: server.id,
+        },
+      },
+    });
+
+    // const member = server.members.find((m) => m.id === memberId);
 
     if (!member) throw new NotFoundException('Member not found');
 
