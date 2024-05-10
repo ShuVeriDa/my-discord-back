@@ -19,8 +19,11 @@ export class MemberController {
   @HttpCode(200)
   @Auth()
   @Get(':id')
-  fetchOneMember(@Param('id') serverId: string, @User('id') userId: string) {
-    return this.memberService.fetchOneMember(serverId, userId);
+  fetchCurrentAuthMember(
+    @Param('id') serverId: string,
+    @User('id') userId: string,
+  ) {
+    return this.memberService.fetchCurrentAuthMember(serverId, userId);
   }
 
   @HttpCode(200)

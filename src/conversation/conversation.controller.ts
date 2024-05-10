@@ -19,11 +19,27 @@ export class ConversationController {
   @HttpCode(200)
   @Get(':id')
   @Auth()
-  fetchConversation(
+  fetchConversationById(
     @Param('id') conversationId: string,
     @User('id') userId: string,
   ) {
-    return this.conversationService.fetchConversation(conversationId, userId);
+    return this.conversationService.fetchConversationById(
+      conversationId,
+      userId,
+    );
+  }
+
+  @HttpCode(200)
+  @Get('/member/:id')
+  @Auth()
+  fetchOrCreateConversationById(
+    @Param('id') memberTwoId: string,
+    @User('id') userId: string,
+  ) {
+    return this.conversationService.fetchOrCreateConversationById(
+      memberTwoId,
+      userId,
+    );
   }
 
   @HttpCode(200)

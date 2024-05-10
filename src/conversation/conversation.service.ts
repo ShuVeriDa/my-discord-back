@@ -10,7 +10,24 @@ import { CreateConversationDto } from './dto/createConversation.dto';
 export class ConversationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async fetchConversation(conversationId: string, userId: string) {
+  async fetchOrCreateConversationById(memberId: string, userId: string) {
+    let conversation =
+      (await this.fetchConversationByIds(userId, memberId)) ||
+      (await this.fetchConversationByIds(memberId, userId));
+
+    if (!conversation)
+      conversation = await this.createNewConversation(
+        { userTwoId: memberId },
+        userId,
+      );
+
+    delete conversation.userOne.password;
+    delete conversation.userTwo.password;
+
+    return conversation;
+  }
+
+  async fetchConversationById(conversationId: string, userId: string) {
     const conversation = await this.prisma.conversation.findFirst({
       where: {
         id: conversationId,
@@ -71,7 +88,10 @@ export class ConversationService {
   }
 
   async deleteConversation(conversationId: string, userId: string) {
-    const conversation = await this.fetchConversation(conversationId, userId);
+    const conversation = await this.fetchConversationById(
+      conversationId,
+      userId,
+    );
 
     await this.prisma.conversation.delete({
       where: {
@@ -80,5 +100,17 @@ export class ConversationService {
     });
 
     return 'The conversation has been deleted';
+  }
+
+  async fetchConversationByIds(userOneId: string, userTwoId: string) {
+    return this.prisma.conversation.findFirst({
+      where: {
+        AND: [{ userOneId: userOneId }, { userTwoId: userTwoId }],
+      },
+      include: {
+        userOne: true,
+        userTwo: true,
+      },
+    });
   }
 }

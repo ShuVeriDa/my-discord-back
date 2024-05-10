@@ -11,7 +11,7 @@ import { MemberRole } from '@prisma/client';
 export class MemberService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async fetchOneMember(serverId: string, userId: string) {
+  async fetchCurrentAuthMember(serverId: string, userId: string) {
     const member = await this.prisma.member.findFirst({
       where: {
         profileId: userId,
@@ -19,7 +19,12 @@ export class MemberService {
           id: serverId,
         },
       },
+      include: {
+        profile: true,
+      },
     });
+
+    delete member.profile.password;
 
     if (!member) throw new NotFoundException('Member not found');
 

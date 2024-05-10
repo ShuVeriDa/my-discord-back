@@ -21,7 +21,7 @@ export class DirectMessageService {
   ) {}
 
   async fetchDirectMessages(dto: FetchDirectMessageDto, userId: string) {
-    const conversation = await this.conversationService.fetchConversation(
+    const conversation = await this.conversationService.fetchConversationById(
       dto.conversationId,
       userId,
     );
@@ -87,7 +87,7 @@ export class DirectMessageService {
   }
 
   async createDirectMessage(dto: CreateDirectMessageDto, userId: string) {
-    const conversation = await this.conversationService.fetchConversation(
+    const conversation = await this.conversationService.fetchConversationById(
       dto.conversationId,
       userId,
     );
@@ -169,7 +169,7 @@ export class DirectMessageService {
     dto: DeleteAllDirectMessagesDto,
     userId: string,
   ) {
-    const conversation = await this.conversationService.fetchConversation(
+    const conversation = await this.conversationService.fetchConversationById(
       dto.conversationId,
       userId,
     );
