@@ -16,13 +16,27 @@ import { UpdateServerDto } from './dto/updateServer.dto';
 
 @Controller('servers')
 export class ServerController {
-  constructor(private readonly serverService: ServerService) {}
+  @Auth()
+  @Get('/invite-code/:inviteCode')
+  async getServerByInviteCode(
+    @Param('inviteCode') inviteCode: string,
+    @User('id') userId: string,
+  ) {
+    return this.serverService.getServerByInviteCode(inviteCode, userId);
+  }
+
+  @Auth()
+  @Get('/profile')
+  async getServerByProfileId(@User('id') userId: string) {
+    return this.serverService.getServerByProfileId(userId);
+  }
 
   @Auth()
   @Get()
   async getAllServers(@User('id') userId: string) {
     return this.serverService.getAllServers(userId);
   }
+  constructor(private readonly serverService: ServerService) {}
 
   @Auth()
   @Get(':id')

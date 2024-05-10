@@ -13,6 +13,48 @@ import { UpdateServerDto } from './dto/updateServer.dto';
 export class ServerService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getServerByProfileId(userId: string) {
+    const server = await this.prisma.server.findFirst({
+      where: {
+        members: {
+          some: { profileId: userId },
+        },
+      },
+    });
+
+    if (!server) throw new NotFoundException('Server not found');
+
+    return server;
+  }
+
+  async getServerByInviteCode(inviteCode: string, userId: string) {
+    const server = await this.prisma.server.findFirst({
+      where: {
+        inviteCode: inviteCode,
+        members: {
+          some: {
+            NOT: { profileId: userId },
+          },
+        },
+      },
+      include: {
+        members: true,
+      },
+    });
+
+    if (!server) throw new NotFoundException('Server not found');
+
+    const isMember = server.members.some(
+      (member) => member.profileId === userId,
+    );
+
+    if (isMember) {
+      return 'You are already a member of the server';
+    }
+
+    return server;
+  }
+
   async getAllServers(userId: string) {
     return this.prisma.server.findMany({
       where: {
