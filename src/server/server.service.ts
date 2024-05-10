@@ -80,10 +80,7 @@ export class ServerService {
   }
 
   async leaveServer(serverId: string, userId: string) {
-    const { server, member, user } = await this.validateServer(
-      serverId,
-      userId,
-    );
+    const { server, member } = await this.validateServer(serverId, userId);
 
     const isOwner = server.profileId === member.profileId;
 
@@ -94,18 +91,18 @@ export class ServerService {
       where: {
         id: server.id,
         profileId: {
-          not: user.id,
+          not: userId,
         },
         members: {
           some: {
-            profileId: user.id,
+            profileId: userId,
           },
         },
       },
       data: {
         members: {
           deleteMany: {
-            profileId: user.id,
+            profileId: userId,
           },
         },
       },
@@ -115,10 +112,7 @@ export class ServerService {
   }
 
   async removeServer(serverId: string, userId: string) {
-    const { server, member, user } = await this.validateServer(
-      serverId,
-      userId,
-    );
+    const { server, member } = await this.validateServer(serverId, userId);
 
     const isOwner = server.profileId === member.profileId;
     const isAdmin = member.role === MemberRole.ADMIN;
@@ -129,26 +123,20 @@ export class ServerService {
     await this.prisma.server.delete({
       where: {
         id: server.id,
-        profileId: user.id,
+        profileId: userId,
       },
     });
 
     return 'Successful removal';
   }
 
-  async validateServer(serverId: string, userId?: string) {
-    const user = await this.prisma.profile.findUnique({
-      where: { id: userId },
-    });
+  async validateServer(serverId: string, userId: string) {
+    const server = await this.getServerById(serverId, userId);
 
-    const server = await this.getServerById(serverId, user.id);
-
-    const member = server.members.find(
-      (member) => member.profileId === user.id,
-    );
+    const member = server.members.find((member) => member.profileId === userId);
 
     if (!member) throw new NotFoundException("You don't have rights");
 
-    return { user, server, member };
+    return { server, member };
   }
 }

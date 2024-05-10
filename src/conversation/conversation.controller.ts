@@ -11,6 +11,7 @@ import { ConversationService } from './conversation.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../user/decorators/user.decorator';
 import { CreateConversationDto } from './dto/createConversation.dto';
+import { ConversationDto } from './dto/conversation.dto';
 
 @Controller('conversations')
 export class ConversationController {
@@ -30,16 +31,13 @@ export class ConversationController {
   }
 
   @HttpCode(200)
-  @Get('/member/:id')
+  @Post()
   @Auth()
   fetchOrCreateConversationById(
-    @Param('id') memberTwoId: string,
+    @Body() dto: ConversationDto,
     @User('id') userId: string,
   ) {
-    return this.conversationService.fetchOrCreateConversationById(
-      memberTwoId,
-      userId,
-    );
+    return this.conversationService.fetchOrCreateConversationById(dto, userId);
   }
 
   @HttpCode(200)

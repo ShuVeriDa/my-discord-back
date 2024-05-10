@@ -27,8 +27,8 @@ export class DirectMessageService {
     );
 
     const IsUserTwo =
-      conversation.userTwoId === dto.userTwoId ||
-      conversation.userOneId === dto.userTwoId;
+      conversation.memberTwoId === dto.userTwoId ||
+      conversation.memberOneId === dto.userTwoId;
 
     if (!IsUserTwo) throw new ForbiddenException("You don't have rights");
 
@@ -46,7 +46,7 @@ export class DirectMessageService {
         },
         include: {
           conversation: true,
-          profile: true,
+          member: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -60,7 +60,7 @@ export class DirectMessageService {
         },
         include: {
           conversation: true,
-          profile: true,
+          member: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -93,8 +93,8 @@ export class DirectMessageService {
     );
 
     const isConversationParticipant =
-      conversation.userTwoId === dto.userTwoId ||
-      conversation.userOneId === dto.userTwoId;
+      conversation.memberTwoId === dto.userTwoId ||
+      conversation.memberOneId === dto.userTwoId;
 
     if (!isConversationParticipant)
       throw new ForbiddenException("You don't have rights");
@@ -104,18 +104,13 @@ export class DirectMessageService {
         content: dto.content,
         fileUrl: dto.fileUrl,
         conversationId: conversation.id,
-        profileId: userId,
+        memberId: userId,
       },
       include: {
         conversation: true,
-        profile: true,
+        member: true,
       },
     });
-
-    delete message.profile.password;
-    delete message.profile.email;
-    delete message.profile.createdAt;
-    delete message.profile.updatedAt;
 
     return message;
   }
@@ -136,7 +131,7 @@ export class DirectMessageService {
         fileUrl: dto.fileUrl,
       },
       include: {
-        profile: true,
+        member: true,
         conversation: true,
       },
     });
@@ -160,7 +155,7 @@ export class DirectMessageService {
       },
       include: {
         conversation: true,
-        profile: true,
+        member: true,
       },
     });
   }
@@ -175,8 +170,8 @@ export class DirectMessageService {
     );
 
     const IsUserTwo =
-      conversation.userTwoId === dto.userTwoId ||
-      conversation.userOneId === dto.userTwoId;
+      conversation.memberTwoId === dto.userTwoId ||
+      conversation.memberOneId === dto.userTwoId;
 
     if (!IsUserTwo) throw new ForbiddenException("You don't have rights");
 
@@ -203,16 +198,16 @@ export class DirectMessageService {
         id: conversationId,
         OR: [
           {
-            userOneId: userId,
+            memberOneId: userId,
           },
           {
-            userTwoId: userId,
+            memberTwoId: userId,
           },
         ],
       },
       include: {
-        userOne: true,
-        userTwo: true,
+        memberOne: true,
+        memberTwo: true,
       },
     });
 
@@ -220,9 +215,9 @@ export class DirectMessageService {
       throw new NotFoundException('The conversation not found');
 
     const profile =
-      conversation.userOneId === userId
-        ? conversation.userOne
-        : conversation.userTwo;
+      conversation.memberOneId === userId
+        ? conversation.memberOne
+        : conversation.memberTwo;
 
     if (!profile) throw new NotFoundException('The participant was not found');
 
@@ -232,14 +227,14 @@ export class DirectMessageService {
         conversationId: conversation.id,
       },
       include: {
-        profile: true,
+        member: true,
       },
     });
 
     if (!directMessage || directMessage.deleted)
       throw new NotFoundException('Message not found');
 
-    const isUserOwner = directMessage.profileId === profile.id;
+    const isUserOwner = directMessage.memberId === profile.id;
 
     if (!isUserOwner) throw new ForbiddenException("You don't have rights");
 

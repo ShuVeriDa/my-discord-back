@@ -43,7 +43,7 @@ export class ChannelService {
   }
 
   async createChannel(dto: CreateChannelDto, userId: string) {
-    const { user, server, member } = await this.serverService.validateServer(
+    const { server, member } = await this.serverService.validateServer(
       dto.serverId,
       userId,
     );
@@ -60,7 +60,7 @@ export class ChannelService {
         id: server.id,
         members: {
           some: {
-            profileId: user.id,
+            profileId: userId,
             role: {
               in: [MemberRole.ADMIN, MemberRole.MODERATOR],
             },
@@ -70,7 +70,7 @@ export class ChannelService {
       data: {
         channels: {
           create: {
-            profileId: user.id,
+            profileId: userId,
             name: dto.name,
             type: dto.type,
           },

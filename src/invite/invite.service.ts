@@ -11,7 +11,7 @@ export class InviteService {
   ) {}
 
   async refreshCode(serverId: string, userId: string) {
-    const { server, user } = await this.serverService.validateServer(
+    const { server } = await this.serverService.validateServer(
       serverId,
       userId,
     );
@@ -19,7 +19,7 @@ export class InviteService {
     return this.prisma.server.update({
       where: {
         id: server.id,
-        profileId: user.id,
+        profileId: userId,
       },
       data: {
         inviteCode: uuidv4(),

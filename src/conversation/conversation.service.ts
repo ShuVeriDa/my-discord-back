@@ -5,24 +5,40 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateConversationDto } from './dto/createConversation.dto';
+import { ConversationDto } from './dto/conversation.dto';
+import { ServerService } from '../server/server.service';
 
 @Injectable()
 export class ConversationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly serverService: ServerService,
+  ) {}
 
-  async fetchOrCreateConversationById(memberId: string, userId: string) {
+  async fetchOrCreateConversationById(dto: ConversationDto, userId: string) {
+    const { server } = await this.serverService.validateServer(
+      dto.serverId,
+      userId,
+    );
+
+    const isMember = server.members.some(
+      (member) => member.id === dto.memberTwoId,
+    );
+
+    if (!isMember) throw new NotFoundException('The two member not found');
+
     let conversation =
-      (await this.fetchConversationByIds(userId, memberId)) ||
-      (await this.fetchConversationByIds(memberId, userId));
+      (await this.fetchConversationByIds(userId, dto.memberTwoId)) ||
+      (await this.fetchConversationByIds(dto.memberTwoId, userId));
 
     if (!conversation)
       conversation = await this.createNewConversation(
-        { userTwoId: memberId },
+        { userTwoId: dto.memberTwoId },
         userId,
       );
 
-    delete conversation.userOne.password;
-    delete conversation.userTwo.password;
+    delete conversation.memberOneId;
+    delete conversation.memberTwoId;
 
     return conversation;
   }
@@ -33,8 +49,8 @@ export class ConversationService {
         id: conversationId,
       },
       include: {
-        userOne: true,
-        userTwo: true,
+        memberOne: true,
+        memberTwo: true,
       },
     });
 
@@ -42,13 +58,14 @@ export class ConversationService {
       throw new NotFoundException('The conversation was not found');
 
     const isConversationParticipant =
-      conversation.userOneId === userId || conversation.userTwoId === userId;
+      conversation.memberOneId === userId ||
+      conversation.memberTwoId === userId;
 
     if (!isConversationParticipant)
       throw new ForbiddenException("You don't have rights");
 
-    delete conversation.userOne.password;
-    delete conversation.userTwo.password;
+    delete conversation.memberOneId;
+    delete conversation.memberTwoId;
 
     return conversation;
   }
@@ -64,7 +81,7 @@ export class ConversationService {
 
     const conversation = await this.prisma.conversation.findFirst({
       where: {
-        AND: [{ userOneId: userId }, { userTwoId: dto.userTwoId }],
+        AND: [{ memberOneId: userId }, { memberTwoId: dto.userTwoId }],
       },
     });
 
@@ -72,17 +89,14 @@ export class ConversationService {
 
     const createdConversation = await this.prisma.conversation.create({
       data: {
-        userOneId: userId,
-        userTwoId: dto.userTwoId,
+        memberOneId: userId,
+        memberTwoId: dto.userTwoId,
       },
       include: {
-        userOne: true,
-        userTwo: true,
+        memberOne: true,
+        memberTwo: true,
       },
     });
-
-    delete createdConversation.userOne.password;
-    delete createdConversation.userTwo.password;
 
     return createdConversation;
   }
@@ -105,11 +119,11 @@ export class ConversationService {
   async fetchConversationByIds(userOneId: string, userTwoId: string) {
     return this.prisma.conversation.findFirst({
       where: {
-        AND: [{ userOneId: userOneId }, { userTwoId: userTwoId }],
+        AND: [{ memberOneId: userOneId }, { memberTwoId: userTwoId }],
       },
       include: {
-        userOne: true,
-        userTwo: true,
+        memberOne: true,
+        memberTwo: true,
       },
     });
   }
