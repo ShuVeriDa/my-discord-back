@@ -20,6 +20,10 @@ export class ServerService {
           some: { profileId: userId },
         },
       },
+      include: {
+        members: true,
+        profile: true,
+      },
     });
 
     if (!server) throw new NotFoundException('Server not found');
@@ -64,6 +68,9 @@ export class ServerService {
           },
         },
       },
+      include: {
+        channels: true,
+      },
     });
   }
 
@@ -76,7 +83,11 @@ export class ServerService {
         },
       },
       include: {
-        members: true,
+        members: {
+          include: {
+            profile: true,
+          },
+        },
         channels: true,
       },
     });

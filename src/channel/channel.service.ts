@@ -8,6 +8,7 @@ import { ServerService } from '../server/server.service';
 import { CreateChannelDto } from './dto/create.dto';
 import { MemberRole } from '@prisma/client';
 import { UpdateChannelDto } from './dto/update.dto';
+import { DeleteChannelDto } from './dto/delete.dto';
 
 @Injectable()
 export class ChannelService {
@@ -146,6 +147,51 @@ export class ChannelService {
         serverId: server.id,
       },
     });
+  }
+
+  async deleteChannel(
+    dto: DeleteChannelDto,
+    channelId: string,
+    userId: string,
+  ) {
+    const { user, server, member } = await this.validateServer(
+      dto.serverId,
+      userId,
+    );
+
+    const isGuest = member.role === MemberRole.GUEST;
+
+    if (isGuest) throw new ForbiddenException('You have no rights!');
+
+    const channel = await this.getChannelById(channelId, server.id, user.id);
+
+    if (!channel) throw new NotFoundException('Channel not found');
+
+    await this.prisma.server.update({
+      where: {
+        id: server.id,
+        members: {
+          some: {
+            profileId: user.id,
+            role: {
+              in: [MemberRole.ADMIN, MemberRole.MODERATOR],
+            },
+          },
+        },
+      },
+      data: {
+        channels: {
+          delete: {
+            id: channelId,
+            name: {
+              not: 'general',
+            },
+          },
+        },
+      },
+    });
+
+    return 'Channel has been deleted';
   }
 
   async validateServer(serverId: string, userId: string) {

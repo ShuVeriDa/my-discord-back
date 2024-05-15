@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -12,6 +13,7 @@ import { CreateChannelDto } from './dto/create.dto';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../user/decorators/user.decorator';
 import { UpdateChannelDto } from './dto/update.dto';
+import { DeleteChannelDto } from './dto/delete.dto';
 
 @Controller('channels')
 export class ChannelController {
@@ -53,5 +55,16 @@ export class ChannelController {
     @User('id') userId: string,
   ) {
     return this.channelService.updateChannel(dto, channelId, userId);
+  }
+
+  @HttpCode(200)
+  @Auth()
+  @Delete(':id')
+  deleteChannel(
+    @Body() dto: DeleteChannelDto,
+    @Param('id') channelId: string,
+    @User('id') userId: string,
+  ) {
+    return this.channelService.deleteChannel(dto, channelId, userId);
   }
 }
