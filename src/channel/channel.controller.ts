@@ -14,6 +14,7 @@ import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../user/decorators/user.decorator';
 import { UpdateChannelDto } from './dto/update.dto';
 import { DeleteChannelDto } from './dto/delete.dto';
+import { FetchChannelDto } from './dto/fetch.dto';
 
 @Controller('channels')
 export class ChannelController {
@@ -33,10 +34,10 @@ export class ChannelController {
   @Post(':id')
   async getChannelById(
     @Param('id') channelId: string,
-    @Body('id') serverId: string,
+    @Body() dto: FetchChannelDto,
     @User('id') userId: string,
   ) {
-    return this.channelService.getChannelById(channelId, serverId, userId);
+    return this.channelService.getChannelById(channelId, dto.serverId, userId);
   }
 
   @HttpCode(200)

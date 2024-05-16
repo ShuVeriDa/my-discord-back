@@ -29,7 +29,10 @@ export class ChannelService {
     const channel = await this.prisma.channel.findUnique({
       where: {
         id: channelId,
-        serverId: server.id,
+        serverId: serverId,
+      },
+      include: {
+        server: true,
       },
     });
 

@@ -32,12 +32,14 @@ export class ServerService {
   }
 
   async getServerByInviteCode(inviteCode: string, userId: string) {
+    console.log({ inviteCode });
+
     const server = await this.prisma.server.findFirst({
       where: {
         inviteCode: inviteCode,
         members: {
           some: {
-            NOT: { profileId: userId },
+            profileId: userId,
           },
         },
       },
@@ -47,14 +49,6 @@ export class ServerService {
     });
 
     if (!server) throw new NotFoundException('Server not found');
-
-    const isMember = server.members.some(
-      (member) => member.profileId === userId,
-    );
-
-    if (isMember) {
-      return 'You are already a member of the server';
-    }
 
     return server;
   }
